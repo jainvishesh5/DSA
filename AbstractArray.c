@@ -8,139 +8,180 @@ typedef struct myArray{
     int *baseAddress;
 }MyArray;
 
-void CreateArray(MyArray * Array, int size , int capacity){
-    (*Array).size = size;// or Array->size = size;
-    (*Array).capacity = capacity;
+void CreateArray(MyArray * arr, int size , int capacity){
+    
     if(capacity < size){
         printf("Capacity should be greater than size\n");
+        arr->baseAddress = NULL;
+        arr->size = 0;
+        arr->capacity = 0;
         return;
     }
-    (*Array).baseAddress  =(int*)malloc(capacity*(sizeof(int)));
-   
-}
-void showArray(MyArray *Array){//traversal
-    for (int i=0 ; i< Array ->size ;i++){
-        printf("%d\n" , (Array ->baseAddress)[i]);
+    
+    (*arr).size = size;// or Array->size = size;
+    (*arr).capacity = capacity;
+    (*arr).baseAddress  =(int*)malloc(capacity * sizeof(int));
+    if(arr->baseAddress == NULL){
+        printf("memory allocation failed\n");
+        exit(1);
     }
 }
-void setVal(MyArray * Array){
-    int n;
-    for (int i=0 ; i< Array -> size ; i++){
+void showArray(MyArray *arr , bool reverse){//traversal
+
+    if(reverse){
+        printf("[ ");
+          for(int i = arr->size - 1; i >= 0; i--){
+
+            printf("%d", arr->baseAddress[i]);
+
+            if(i != 0){
+                printf(" ");
+            }
+        }
+        printf(" ]\n");
+        return;
+    }
+    printf("[ ");
+    for (int i=0 ; i< arr->size ;i++){
+        printf("%d " , (arr->baseAddress)[i]);
+    }
+    printf("]\n");
+}
+void setVal(MyArray *arr){
+    for (int i=0 ; i< arr->size ; i++){
         printf("Enter value at index %d :", i);
-        scanf("%d", &(Array ->baseAddress)[i]);//or scanf("%d", Array->baseAddress + i);
+        scanf("%d", &(arr->baseAddress)[i]);//or scanf("%d", Array->baseAddress + i);
     }
 }
-int length(MyArray *Array){
-    return Array -> size;
+int length(MyArray *arr){
+    return arr-> size;
 }
-void resizeArray(MyArray *Array){
-    int newCapacity = Array ->capacity +10;
-    int *newBaseAddress = (int*)malloc(newCapacity*(sizeof(int)));
+bool resizeArray(MyArray *arr){
+    int newCapacity = 0;
+    if(arr->capacity == 0) newCapacity=1;
+    else{newCapacity = arr->capacity *2;}
+    int *newBaseAddress = (int*)malloc(newCapacity * (sizeof(int)));
     if(!newBaseAddress){
         printf("Memory allocation failed\n");
-        return;
+        return false;
     }
-    for(int i=0 ;i<Array->size ;i++){
-        newBaseAddress[i] = Array-> baseAddress[i];
+    for(int i=0 ;i<arr->size ;i++){
+        newBaseAddress[i] = arr-> baseAddress[i];
     }
-    free(Array->baseAddress);
-    Array->baseAddress = newBaseAddress;
-    Array->capacity = newCapacity;
+    free(arr->baseAddress);
+    arr->baseAddress = newBaseAddress;
+    arr->capacity = newCapacity;
+
+    return true;
 }
-void insertAt(MyArray *Array , int value, int index , bool override ,bool swapback){
-    if(index < 0 || index > Array -> size){
+
+void overrideAt(MyArray *arr , int value , int index){
+     if(index < 0 || index >= arr->size){
         printf("Index out of bounds\n");
         return;
     }
-    if (override){
-        if(index < Array -> size){
-            Array -> baseAddress[index] = value;
-        }
-        else{
-            printf("Index out of bounds\n");
-        }
+        arr->baseAddress[index] = value;
     }
-    else if(swapback){
-       if(Array -> size >= Array -> capacity){
+
+void swapback(MyArray *arr , int value , int index){
+    if(index < 0 || index > arr->size){
+        printf("Index out of bounds\n");
+        return;
+    }
+       if(arr->size == arr->capacity){
             printf("Array overflow! resizing...\n");
-            resizeArray(Array);
+            if(!resizeArray(arr)){
+                return;
+             }
        }
-       else if(index > Array -> size){
-            printf("Index out of bounds\n");
-       }
-       else{
-        int temp = Array->baseAddress[index];
-        Array -> baseAddress[index] =value;
-        (Array ->baseAddress)[Array ->size] =temp;
-        Array->size++;
-       }
+    if(index == arr->size){
+        arr->baseAddress[arr->size] = value;
+        arr->size++;
+        return;
     }
-    else{
-        if(Array-> size >= Array ->capacity){
+    int temp = arr->baseAddress[index];
+        arr-> baseAddress[index] =value;
+        (arr->baseAddress)[arr->size] =temp;
+        arr->size++;
+    }
+
+void insertAt(MyArray *arr , int value, int index){
+    if(index < 0 || index > arr->size){
+        printf("Index out of bounds\n");
+        return;
+    }
+   
+        if(arr-> size >= arr->capacity){
             printf("array overflow! resizing...\n");
-            resizeArray(Array);
-        }
-        {
-            Array->size++;
-            for (int i = Array->size ;i>=index ; i--){
-                Array->baseAddress[i] = Array->baseAddress[i-1];
-            }
-            Array->baseAddress[index] = value;
-        }
-    }
-    
+            if(!resizeArray(arr)){
+            return;
 }
-void deleteAt(MyArray *Array , int index , bool swaplast){
-    if(Array->size == 0){
+        }
+            arr->size++;
+            for (int i = arr->size-1 ;i>index ; i--){
+                arr->baseAddress[i] = arr->baseAddress[i-1];
+            }
+            arr->baseAddress[index] = value;
+        }
+
+void append(MyArray *arr, int value){
+    insertAt(arr, value, arr->size);
+}
+
+void deleteAt(MyArray *arr , int index , bool swaplast){
+    if(arr->size == 0){
         printf("Array is empty\n");
         return;
     }
-    if(index<0 || index >=Array->size){
+    if(index<0 || index >=arr->size){
         printf("index out of bounds\n");
         return;
     }
     
     if(!swaplast){
-        for(int i=index ; i<Array->size-1 ; i++){
-            Array ->baseAddress[i] = Array ->baseAddress[i+1];
+        for(int i=index ; i<arr->size-1 ; i++){
+         arr->baseAddress[i] = arr->baseAddress[i+1];
         }
     }
     else{
-        Array->baseAddress[index] = Array->baseAddress[Array->size -1];
+      arr->baseAddress[index] = arr->baseAddress[arr->size -1];
     }
-    Array->size --;
-
+    arr->size --;
 }
-void linearSearch(MyArray *Array , int value){
-    for (int i=0 ; i<Array->size ; i++){
-        if((Array->baseAddress)[i] == value){
-            printf("value found! at index %d\n", i);
-            return;
+
+void destroyArray(MyArray *arr){
+
+    free(arr->baseAddress);
+
+    arr->baseAddress = NULL;
+    arr->size = 0;
+    arr->capacity = 0;
+}
+
+int linearSearch(MyArray *arr , int value){
+    for (int i=0 ; i<arr->size ; i++){
+        if((arr->baseAddress)[i] == value){
+            return i;
         }
     }
-    printf("value not found\n");
+    return -1;
 }
-void binarySearch(MyArray *Array , int value,int n){
+int binarySearch(MyArray *arr, int value){
     //sorting is required for binary search
     int low =0;
-    int high = Array->size -1;
+    int high = arr->size -1;
     while(low <=high){
-        int mid =(low +high)/2;
-        if (Array->baseAddress[mid] ==value){
-            printf("element found! at index %d\n" , mid);
-            return;
+        int mid = (low + high) /2;
+        if (arr->baseAddress[mid] ==value){
+            return mid;
         }
-        else if(Array ->baseAddress[mid]<value){
+        else if(arr->baseAddress[mid]<value){
             low = mid +1;
         }
         else high = mid -1;
     }
-    printf("element not found\n");
+   return -1;
 }
-void bubbleSort(MyArray *Array){}
-void insertionSort(MyArray *Array){}
-void selectionSort(MyArray *Array){}
-void mergeSort(MyArray *Array){}
 void quickSort(MyArray *Array){}
-void Sort(MyArray *Array){}
+
 
