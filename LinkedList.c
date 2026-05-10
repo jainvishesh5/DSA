@@ -41,12 +41,12 @@ void traversal(LinkedList list, bool reverse)
         Node *current = list.head;
         while (current != NULL)
         {
-            insertAt(&array, current->data, i, true, false);
+            insertAt(&array, current->data, i);
             current = current->next;
             i--;
         }
-        showArray(&array);
-        free(array.baseAddress);
+        showArray(&array, true);
+        destroyArray(&array);
     }
 }
 
