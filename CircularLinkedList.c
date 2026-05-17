@@ -78,6 +78,7 @@ void insert(CircularLinkedList* list, int data, int mode, int param) {
                 return;
             }
             if (param == 0) {
+                free(newNode);  // Free the allocated node before recursive call
                 insert(list, data, 0, 0);
                 return;
             }
@@ -140,6 +141,7 @@ void deleteNode(CircularLinkedList* list, int mode, int param) {
                 prev->next = list->head;
                 free(temp);
             }
+            list->size--;
             break;
 
         case 1: // Delete from end
@@ -154,6 +156,7 @@ void deleteNode(CircularLinkedList* list, int mode, int param) {
                 list->tail = prev;
                 free(temp);
             }
+            list->size--;
             break;
 
         case 2: { // Delete at index
@@ -172,6 +175,7 @@ void deleteNode(CircularLinkedList* list, int mode, int param) {
             if (delNode == list->tail)
                 list->tail = temp;
             free(delNode);
+            list->size--;
             break;
         }
 
@@ -200,7 +204,6 @@ void deleteNode(CircularLinkedList* list, int mode, int param) {
             printf("Invalid delete mode\n");
             return;
     }
-    list->size--;
 }
 
 // Test the functions
