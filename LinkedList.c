@@ -22,7 +22,7 @@ void initList(LinkedList *list)
     list->tail = NULL;
 }
 
-void traversal(LinkedList list, bool reverse)
+void traversal(const LinkedList list, bool reverse)
 {
     if (!reverse)
     {
